@@ -1,0 +1,42 @@
+/*
+** Função : Definir estrutura perfil_saude
+** Autor : [Seu Nome]
+** Data : [Data de hoje]
+** Observações: Estrutura que contém informações do perfil de saúde de uma pessoa.
+*/
+
+#include <stdio.h>
+
+typedef struct {
+    int dia;
+    int mes;
+    int ano;
+} DataNascimento;
+
+typedef struct {
+    char nome_completo[80];
+    char sexo;
+    DataNascimento data_nascimento;
+    float altura;
+    float peso;
+} perfil_saude;
+
+int main() {
+    perfil_saude pessoa;
+
+    snprintf(pessoa.nome_completo, sizeof(pessoa.nome_completo), "João da Silva");
+    pessoa.sexo = 'M';
+    pessoa.data_nascimento.dia = 15;
+    pessoa.data_nascimento.mes = 4;
+    pessoa.data_nascimento.ano = 1990;
+    pessoa.altura = 1.75;
+    pessoa.peso = 70.5;
+
+    printf("Nome Completo: %s\n", pessoa.nome_completo);
+    printf("Sexo: %c\n", pessoa.sexo);
+    printf("Data de Nascimento: %02d/%02d/%d\n", pessoa.data_nascimento.dia, pessoa.data_nascimento.mes, pessoa.data_nascimento.ano);
+    printf("Altura: %.2f\n", pessoa.altura);
+    printf("Peso: %.2f\n", pessoa.peso);
+
+    return 0;
+}
