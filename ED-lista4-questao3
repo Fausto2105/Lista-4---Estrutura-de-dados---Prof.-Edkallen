@@ -1,11 +1,18 @@
 /*
-** Função : Definir estrutura perfil_saude
+** Função : Definir estrutura perfil_saude e realizar cálculos de saúde
 ** Autor : [Seu Nome]
 ** Data : [Data de hoje]
-** Observações: Estrutura que contém informações do perfil de saúde de uma pessoa.
+** Observações: Estrutura que contém informações do perfil de saúde de uma pessoa, funções para calcular idade, IMC, frequência cardíaca e expectativa de vida.
 */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+#define MAX_NAME_LENGTH 80
+#define EXPECTANCY_MALE 73
+#define EXPECTANCY_FEMALE 80
 
 typedef struct {
     int dia;
@@ -14,29 +21,113 @@ typedef struct {
 } DataNascimento;
 
 typedef struct {
-    char nome_completo[80];
+    char nome_completo[MAX_NAME_LENGTH];
     char sexo;
     DataNascimento data_nascimento;
     float altura;
     float peso;
 } perfil_saude;
 
-int main() {
-    perfil_saude pessoa;
+int calcular_idade(DataNascimento data_nascimento) {
+    time_t t = time(NULL);
+    struct tm tm = *localtime(&t);
 
-    snprintf(pessoa.nome_completo, sizeof(pessoa.nome_completo), "João da Silva");
-    pessoa.sexo = 'M';
-    pessoa.data_nascimento.dia = 15;
-    pessoa.data_nascimento.mes = 4;
-    pessoa.data_nascimento.ano = 1990;
-    pessoa.altura = 1.75;
-    pessoa.peso = 70.5;
+    int idade = tm.tm_year + 1900 - data_nascimento.ano;
+    if (tm.tm_mon + 1 < data_nascimento.mes || (tm.tm_mon + 1 == data_nascimento.mes && tm.tm_mday < data_nascimento.dia)) {
+        idade--;
+    }
+    return idade;
+}
 
+float calcular_imc(float peso, float altura) {
+    return peso / (altura * altura);
+}
+
+int calcular_frequencia_cardiaca_maxima(int idade) {
+    return 220 - idade;
+}
+
+int calcular_frequencia_cardiaca_ideal(int idade, char sexo) {
+    int fcm = calcular_frequencia_cardiaca_maxima(idade);
+    return (sexo == 'M' || sexo == 'm') ? (int)(fcm * 0.85) : (int)(fcm * 0.75);
+}
+
+int calcular_expectativa_vida(int idade, char sexo) {
+    return (sexo == 'M' || sexo == 'm') ? EXPECTANCY_MALE - idade : EXPECTANCY_FEMALE - idade;
+}
+
+void exibir_tabela_imc() {
+    printf("Tabela de Valores do IMC:\n");
+    printf("Menor que 18.5: Abaixo do peso\n");
+    printf("Entre 18.5 e 24.9: Peso normal\n");
+    printf("Entre 25 e 29.9: Sobrepeso\n");
+    printf("30 ou mais: Obesidade\n");
+}
+
+void receber_dados(perfil_saude *pessoa) {
+    printf("Digite o nome completo: ");
+    fgets(pessoa->nome_completo, MAX_NAME_LENGTH, stdin);
+    pessoa->nome_completo[strcspn(pessoa->nome_completo, "\n")] = '\0'; // Remove o '\n' do final da string
+
+    printf("Digite o sexo (M/F): ");
+    scanf(" %c", &pessoa->sexo);
+
+    printf("Digite o dia de nascimento: ");
+    scanf("%d", &pessoa->data_nascimento.dia);
+
+    printf("Digite o mês de nascimento: ");
+    scanf("%d", &pessoa->data_nascimento.mes);
+
+    printf("Digite o ano de nascimento: ");
+    scanf("%d", &pessoa->data_nascimento.ano);
+
+    printf("Digite a altura (em metros): ");
+    scanf("%f", &pessoa->altura);
+
+    printf("Digite o peso (em kg): ");
+    scanf("%f", &pessoa->peso);
+}
+
+void exibir_dados(perfil_saude pessoa) {
+    printf("\nDados do Perfil de Saúde:\n");
     printf("Nome Completo: %s\n", pessoa.nome_completo);
     printf("Sexo: %c\n", pessoa.sexo);
     printf("Data de Nascimento: %02d/%02d/%d\n", pessoa.data_nascimento.dia, pessoa.data_nascimento.mes, pessoa.data_nascimento.ano);
-    printf("Altura: %.2f\n", pessoa.altura);
-    printf("Peso: %.2f\n", pessoa.peso);
+    printf("Altura: %.2f m\n", pessoa.altura);
+    printf("Peso: %.2f kg\n", pessoa.peso);
+}
 
+void calcular_exibir_informacoes(perfil_saude pessoa) {
+    int idade = calcular_idade(pessoa.data_nascimento);
+    float imc = calcular_imc(pessoa.peso, pessoa.altura);
+    int fcm = calcular_frequencia_cardiaca_maxima(idade);
+    int fci = calcular_frequencia_cardiaca_ideal(idade, pessoa.sexo);
+    int expectativa_vida = calcular_expectativa_vida(idade, pessoa.sexo);
+
+    printf("\nInformações Calculadas:\n");
+    printf("Idade: %d anos\n", idade);
+    printf("IMC: %.2f\n", imc);
+    exibir_tabela_imc();
+    printf("Frequência Cardíaca Máxima: %d bpm\n", fcm);
+    printf("Frequência Cardíaca Ideal: %d bpm\n", fci);
+    printf("Expectativa de Vida: %d anos\n", expectativa_vida);
+}
+
+int main() {
+    int n;
+    printf("Digite o número de pessoas: ");
+    scanf("%d", &n);
+    getchar(); // Limpar o buffer do '\n'
+
+    perfil_saude *pessoas = (perfil_saude *)malloc(n * sizeof(perfil_saude));
+
+    for (int i = 0; i < n; i++) {
+        printf("\nPessoa %d:\n", i + 1);
+        receber_dados(&pessoas[i]);
+        exibir_dados(pessoas[i]);
+        calcular_exibir_informacoes(pessoas[i]);
+    }
+
+    free(pessoas);
     return 0;
 }
