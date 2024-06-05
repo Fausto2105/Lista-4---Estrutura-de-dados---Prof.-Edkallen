@@ -1,1 +1,56 @@
+/*
+** Função : Implementar a classificação por seleção e testar com dados aleatórios
+** Autor : [Seu Nome]
+** Data : [Data de hoje]
+** Observações: A função classifica um vetor de inteiros em ordem crescente utilizando o algoritmo de seleção.
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+void selection_sort(int arr[], int n) {
+    for (int i = 0; i < n - 1; i++) {
+        int min_index = i;
+        for (int j = i + 1; j < n; j++) {
+            if (arr[j] < arr[min_index]) {
+                min_index = j;
+            }
+        }
+        int temp = arr[min_index];
+        arr[min_index] = arr[i];
+        arr[i] = temp;
+    }
+}
+
+void print_array(int arr[], int n) {
+    for (int i = 0; i < n; i++) {
+        printf("%d ", arr[i]);
+    }
+    printf("\n");
+}
+
+int main() {
+    int n;
+    printf("Digite o número de elementos no vetor: ");
+    scanf("%d", &n);
+
+    int *arr = (int *)malloc(n * sizeof(int));
+
+    srand(time(NULL));
+    for (int i = 0; i < n; i++) {
+        arr[i] = rand() % 100; 
+    }
+
+    printf("Vetor antes da classificação:\n");
+    print_array(arr, n);
+
+    selection_sort(arr, n);
+
+    printf("Vetor após a classificação por seleção:\n");
+    print_array(arr, n);
+
+    free(arr);
+    return 0;
+}
 
