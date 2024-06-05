@@ -1,0 +1,111 @@
+/*
+** Função : Gerenciamento de atendimento para uma clínica médica
+** Autor : [Seu Nome]
+** Data : [Data de hoje]
+** Observações: O programa gerencia uma fila de atendimento, permitindo adicionar pacientes, atender o próximo paciente e verificar a quantidade de pacientes na fila.
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_NAME_LENGTH 100
+
+typedef struct Paciente {
+    char nome[MAX_NAME_LENGTH];
+    struct Paciente* proximo;
+} Paciente;
+
+typedef struct {
+    Paciente* frente;
+    Paciente* traseira;
+    int quantidade;
+} Atendimento;
+
+void inicializar_atendimento(Atendimento* atendimento) {
+    atendimento->frente = NULL;
+    atendimento->traseira = NULL;
+    atendimento->quantidade = 0;
+}
+
+void adicionar_paciente(Atendimento* atendimento, char nome[]) {
+    Paciente* novo_paciente = (Paciente*)malloc(sizeof(Paciente));
+    strncpy(novo_paciente->nome, nome, MAX_NAME_LENGTH);
+    novo_paciente->proximo = NULL;
+
+    if (atendimento->traseira == NULL) {
+        atendimento->frente = novo_paciente;
+        atendimento->traseira = novo_paciente;
+    } else {
+        atendimento->traseira->proximo = novo_paciente;
+        atendimento->traseira = novo_paciente;
+    }
+
+    atendimento->quantidade++;
+    printf("Paciente %s adicionado à fila\n", nome);
+}
+
+char* proximo_paciente(Atendimento* atendimento) {
+    if (atendimento->frente == NULL) {
+        return "Não há pacientes na fila";
+    }
+
+    Paciente* paciente_atendido = atendimento->frente;
+    char* nome = paciente_atendido->nome;
+
+    atendimento->frente = atendimento->frente->proximo;
+    if (atendimento->frente == NULL) {
+        atendimento->traseira = NULL;
+    }
+
+    atendimento->quantidade--;
+    free(paciente_atendido);
+
+    return nome;
+}
+
+int quantidade_pacientes(Atendimento* atendimento) {
+    return atendimento->quantidade;
+}
+
+int main() {
+    Atendimento atendimento;
+    inicializar_atendimento(&atendimento);
+
+    int escolha;
+    char nome[MAX_NAME_LENGTH];
+
+    do {
+        printf("\nEscolha uma operação:\n");
+        printf("1. Adicionar paciente\n");
+        printf("2. Próximo paciente\n");
+        printf("3. Quantidade de pacientes\n");
+        printf("4. Sair\n");
+        printf("Escolha: ");
+        scanf("%d", &escolha);
+        getchar(); 
+
+        switch (escolha) {
+            case 1:
+                printf("Digite o nome do paciente: ");
+                fgets(nome, MAX_NAME_LENGTH, stdin);
+                nome[strcspn(nome, "\n")] = '\0'; 
+                adicionar_paciente(&atendimento, nome);
+                break;
+            case 2:
+                printf("Próximo paciente a ser atendido: %s\n", proximo_paciente(&atendimento));
+                break;
+            case 3:
+                printf("Quantidade de pacientes na fila: %d\n", quantidade_pacientes(&atendimento));
+                break;
+            case 4:
+                printf("Programa encerrado\n");
+                break;
+            default:
+                printf("Escolha inválida\n");
+                break;
+        }
+    } while (escolha != 4);
+
+    return 0;
+}
