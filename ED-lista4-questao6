@@ -1,0 +1,154 @@
+/*
+** Função : Simular uma lista de compras
+** Autor : [Seu Nome]
+** Data : [Data de hoje]
+** Observações: O programa gerencia uma lista de compras, permitindo inserir, remover, consultar e mostrar todos os itens da lista.
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_NAME_LENGTH 100
+
+typedef struct Item {
+    char nome[MAX_NAME_LENGTH];
+    int quantidade;
+    struct Item* proximo;
+} Item;
+
+typedef struct {
+    Item* cabeca;
+} ListaCompras;
+
+void inicializar_lista(ListaCompras* lista) {
+    lista->cabeca = NULL;
+}
+
+void inserir_item(ListaCompras* lista, char nome[], int quantidade) {
+    Item* novo_item = (Item*)malloc(sizeof(Item));
+    strncpy(novo_item->nome, nome, MAX_NAME_LENGTH);
+    novo_item->quantidade = quantidade;
+    novo_item->proximo = lista->cabeca;
+    lista->cabeca = novo_item;
+    printf("Item inserido: %s - %d\n", nome, quantidade);
+}
+
+void remover_item(ListaCompras* lista, char nome[]) {
+    Item* atual = lista->cabeca;
+    Item* anterior = NULL;
+
+    while (atual != NULL && strcmp(atual->nome, nome) != 0) {
+        anterior = atual;
+        atual = atual->proximo;
+    }
+
+    if (atual == NULL) {
+        printf("Item não encontrado na lista\n");
+        return;
+    }
+
+    if (anterior == NULL) {
+        lista->cabeca = atual->proximo;
+    } else {
+        anterior->proximo = atual->proximo;
+    }
+
+    printf("Item removido: %s - %d\n", atual->nome, atual->quantidade);
+    free(atual);
+}
+
+void consultar_item(ListaCompras* lista, char nome[]) {
+    Item* atual = lista->cabeca;
+
+    while (atual != NULL) {
+        if (strcmp(atual->nome, nome) == 0) {
+            printf("Item encontrado: %s - %d\n", atual->nome, atual->quantidade);
+            return;
+        }
+        atual = atual->proximo;
+    }
+
+    printf("Item não encontrado na lista\n");
+}
+
+void mostrar_lista(ListaCompras* lista) {
+    Item* atual = lista->cabeca;
+
+    if (atual == NULL) {
+        printf("Lista de compras vazia\n");
+        return;
+    }
+
+    printf("Itens na lista de compras:\n");
+    while (atual != NULL) {
+        printf("%s - %d\n", atual->nome, atual->quantidade);
+        atual = atual->proximo;
+    }
+}
+
+void liberar_lista(ListaCompras* lista) {
+    Item* atual = lista->cabeca;
+    while (atual != NULL) {
+        Item* temp = atual;
+        atual = atual->proximo;
+        free(temp);
+    }
+    lista->cabeca = NULL;
+}
+
+int main() {
+    ListaCompras lista;
+    inicializar_lista(&lista);
+
+    int escolha;
+    char nome[MAX_NAME_LENGTH];
+    int quantidade;
+
+    do {
+        printf("\nEscolha uma operação:\n");
+        printf("1. Inserir item\n");
+        printf("2. Remover item\n");
+        printf("3. Consultar item\n");
+        printf("4. Mostrar todos os itens\n");
+        printf("5. Sair\n");
+        printf("Escolha: ");
+        scanf("%d", &escolha);
+        getchar(); 
+
+        switch (escolha) {
+            case 1:
+                printf("Digite o nome do produto: ");
+                fgets(nome, MAX_NAME_LENGTH, stdin);
+                nome[strcspn(nome, "\n")] = '\0'; 
+                printf("Digite a quantidade: ");
+                scanf("%d", &quantidade);
+                inserir_item(&lista, nome, quantidade);
+                break;
+            case 2:
+                printf("Digite o nome do produto para remover: ");
+                fgets(nome, MAX_NAME_LENGTH, stdin);
+                nome[strcspn(nome, "\n")] = '\0'; 
+                remover_item(&lista, nome);
+                break;
+            case 3:
+                printf("Digite o nome do produto para consultar: ");
+                fgets(nome, MAX_NAME_LENGTH, stdin);
+                nome[strcspn(nome, "\n")] = '\0'; 
+                consultar_item(&lista, nome);
+                break;
+            case 4:
+                mostrar_lista(&lista);
+                break;
+            case 5:
+                liberar_lista(&lista);
+                printf("Programa encerrado\n");
+                break;
+            default:
+                printf("Escolha inválida\n");
+                break;
+        }
+    } while (escolha != 5);
+
+    return 0;
+}
