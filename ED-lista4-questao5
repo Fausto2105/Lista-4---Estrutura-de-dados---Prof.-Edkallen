@@ -1,1 +1,118 @@
+/*
+** Função : Gerenciar uma pilha de processos
+** Autor : [Seu Nome]
+** Data : [Data de hoje]
+** Observações: O programa gerencia uma pilha de processos, permitindo incluir, retirar e encerrar processos na pilha.
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_DESCRIPTION_LENGTH 100
+
+typedef struct {
+    int identificador;
+    char descricao[MAX_DESCRIPTION_LENGTH];
+} Processo;
+
+typedef struct Node {
+    Processo processo;
+    struct Node* proximo;
+} Node;
+
+typedef struct {
+    Node* topo;
+} Pilha;
+
+void inicializar_pilha(Pilha* pilha) {
+    pilha->topo = NULL;
+}
+
+int pilha_vazia(Pilha* pilha) {
+    return pilha->topo == NULL;
+}
+
+void incluir_processo(Pilha* pilha, int identificador, char descricao[]) {
+    Node* novo_node = (Node*)malloc(sizeof(Node));
+    novo_node->processo.identificador = identificador;
+    strncpy(novo_node->processo.descricao, descricao, MAX_DESCRIPTION_LENGTH);
+    novo_node->proximo = pilha->topo;
+    pilha->topo = novo_node;
+}
+
+void retirar_processo(Pilha* pilha) {
+    if (pilha_vazia(pilha)) {
+        printf("Pilha vazia\n");
+    } else {
+        Node* temp = pilha->topo;
+        pilha->topo = pilha->topo->proximo;
+        printf("Removido o processo #%d - %s\n", temp->processo.identificador, temp->processo.descricao);
+        free(temp);
+    }
+}
+
+void imprimir_pilha(Pilha* pilha) {
+    if (pilha_vazia(pilha)) {
+        printf("Pilha vazia\n");
+    } else {
+        Node* atual = pilha->topo;
+        printf("Estado atual da pilha:\n");
+        while (atual != NULL) {
+            printf("Processo #%d - %s\n", atual->processo.identificador, atual->processo.descricao);
+            atual = atual->proximo;
+        }
+    }
+}
+
+void esvaziar_pilha(Pilha* pilha) {
+    while (!pilha_vazia(pilha)) {
+        retirar_processo(pilha);
+    }
+}
+
+int main() {
+    Pilha pilha;
+    inicializar_pilha(&pilha);
+
+    int escolha;
+    int identificador;
+    char descricao[MAX_DESCRIPTION_LENGTH];
+
+    do {
+        printf("\nEscolha uma operação:\n");
+        printf("1. Incluir processo\n");
+        printf("2. Retirar processo\n");
+        printf("3. Encerrar\n");
+        printf("Escolha: ");
+        scanf("%d", &escolha);
+        getchar();
+
+        switch (escolha) {
+            case 1:
+                printf("Digite o identificador do processo: ");
+                scanf("%d", &identificador);
+                getchar(); 
+                printf("Digite a descricao do processo: ");
+                fgets(descricao, MAX_DESCRIPTION_LENGTH, stdin);
+                descricao[strcspn(descricao, "\n")] = '\0'; // Remove o '\n' do final da string
+                incluir_processo(&pilha, identificador, descricao);
+                imprimir_pilha(&pilha);
+                break;
+            case 2:
+                retirar_processo(&pilha);
+                imprimir_pilha(&pilha);
+                break;
+            case 3:
+                esvaziar_pilha(&pilha);
+                printf("Programa encerrado\n");
+                break;
+            default:
+                printf("Escolha invalida\n");
+                break;
+        }
+    } while (escolha != 3);
+
+    return 0;
+}
 
