@@ -1,0 +1,229 @@
+/*
+** Função : Gerenciar livros de uma biblioteca usando uma lista encadeada
+** Autor : [Seu Nome]
+** Data : [Data Atual]
+** Observações: Este programa permite a inserção ordenada, remoção, alteração, busca por título e autor, e impressão de todos os livros na biblioteca.
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct Livro {
+    char autor[100];
+    char titulo[100];
+    char editora[100];
+    int ano;
+    struct Livro *proximo;
+} Livro;
+
+typedef struct {
+    Livro *head;
+} Biblioteca;
+
+void inicializarBiblioteca(Biblioteca *biblio) {
+    biblio->head = NULL;
+}
+
+void inserirOrdenado(Biblioteca *biblio, char *autor, char *titulo, char *editora, int ano) {
+    Livro *novo_livro = (Livro*) malloc(sizeof(Livro));
+    strcpy(novo_livro->autor, autor);
+    strcpy(novo_livro->titulo, titulo);
+    strcpy(novo_livro->editora, editora);
+    novo_livro->ano = ano;
+    novo_livro->proximo = NULL;
+
+    if (biblio->head == NULL || strcmp(biblio->head->titulo, titulo) > 0) {
+        novo_livro->proximo = biblio->head;
+        biblio->head = novo_livro;
+    } else {
+        Livro *atual = biblio->head;
+        while (atual->proximo != NULL && strcmp(atual->proximo->titulo, titulo) < 0) {
+            atual = atual->proximo;
+        }
+        novo_livro->proximo = atual->proximo;
+        atual->proximo = novo_livro;
+    }
+    printf("Livro '%s' inserido com sucesso.\n", titulo);
+}
+
+void removerLivro(Biblioteca *biblio, char *titulo) {
+    if (biblio->head == NULL) {
+        printf("A biblioteca está vazia.\n");
+        return;
+    }
+
+    Livro *atual = biblio->head;
+    Livro *anterior = NULL;
+
+    while (atual != NULL && strcmp(atual->titulo, titulo) != 0) {
+        anterior = atual;
+        atual = atual->proximo;
+    }
+
+    if (atual == NULL) {
+        printf("Livro '%s' não encontrado.\n", titulo);
+        return;
+    }
+
+    if (anterior == NULL) {
+        biblio->head = atual->proximo;
+    } else {
+        anterior->proximo = atual->proximo;
+    }
+    free(atual);
+    printf("Livro '%s' removido com sucesso.\n", titulo);
+}
+
+void alterarLivro(Biblioteca *biblio, char *titulo, char *novo_autor, char *novo_titulo, char *nova_editora, int novo_ano) {
+    Livro *atual = biblio->head;
+    while (atual != NULL && strcmp(atual->titulo, titulo) != 0) {
+        atual = atual->proximo;
+    }
+
+    if (atual == NULL) {
+        printf("Livro '%s' não encontrado.\n", titulo);
+        return;
+    }
+
+    if (novo_autor[0] != '\0') {
+        strcpy(atual->autor, novo_autor);
+    }
+    if (novo_titulo[0] != '\0') {
+        strcpy(atual->titulo, novo_titulo);
+    }
+    if (nova_editora[0] != '\0') {
+        strcpy(atual->editora, nova_editora);
+    }
+    if (novo_ano != 0) {
+        atual->ano = novo_ano;
+    }
+    printf("Livro '%s' alterado com sucesso.\n", titulo);
+}
+
+void buscarPorTitulo(Biblioteca *biblio, char *titulo) {
+    Livro *atual = biblio->head;
+    while (atual != NULL) {
+        if (strcmp(atual->titulo, titulo) == 0) {
+            printf("Título: %s, Autor: %s, Editora: %s, Ano: %d\n", atual->titulo, atual->autor, atual->editora, atual->ano);
+            return;
+        }
+        atual = atual->proximo;
+    }
+    printf("Livro '%s' não encontrado.\n", titulo);
+}
+
+void buscarPorAutor(Biblioteca *biblio, char *autor) {
+    Livro *atual = biblio->head;
+    int encontrou = 0;
+    while (atual != NULL) {
+        if (strcmp(atual->autor, autor) == 0) {
+            printf("Título: %s, Autor: %s, Editora: %s, Ano: %d\n", atual->titulo, atual->autor, atual->editora, atual->ano);
+            encontrou = 1;
+        }
+        atual = atual->proximo;
+    }
+    if (!encontrou) {
+        printf("Nenhum livro encontrado para o autor '%s'.\n", autor);
+    }
+}
+
+void imprimirTodos(Biblioteca *biblio) {
+    Livro *atual = biblio->head;
+    if (atual == NULL) {
+        printf("A biblioteca está vazia.\n");
+    }
+    while (atual != NULL) {
+        printf("Título: %s, Autor: %s, Editora: %s, Ano: %d\n", atual->titulo, atual->autor, atual->editora, atual->ano);
+        atual = atual->proximo;
+    }
+}
+
+void menu() {
+    Biblioteca biblio;
+    inicializarBiblioteca(&biblio);
+
+    int opcao;
+    char autor[100], titulo[100], editora[100];
+    int ano;
+    
+    do {
+        printf("\nMenu:\n");
+        printf("1. Inserir livro\n");
+        printf("2. Remover livro\n");
+        printf("3. Alterar livro\n");
+        printf("4. Buscar livro por título\n");
+        printf("5. Buscar livro por autor\n");
+        printf("6. Imprimir todos os livros\n");
+        printf("0. Sair\n");
+        printf("Escolha uma opção: ");
+        scanf("%d", &opcao);
+        getchar();  
+
+        switch(opcao) {
+            case 1:
+                printf("Autor: ");
+                fgets(autor, sizeof(autor), stdin);
+                autor[strcspn(autor, "\n")] = 0;  
+                printf("Título: ");
+                fgets(titulo, sizeof(titulo), stdin);
+                titulo[strcspn(titulo, "\n")] = 0;
+                printf("Editora: ");
+                fgets(editora, sizeof(editora), stdin);
+                editora[strcspn(editora, "\n")] = 0;
+                printf("Ano: ");
+                scanf("%d", &ano);
+                getchar();  
+                inserirOrdenado(&biblio, autor, titulo, editora, ano);
+                break;
+            case 2:
+                printf("Título do livro a remover: ");
+                fgets(titulo, sizeof(titulo), stdin);
+                titulo[strcspn(titulo, "\n")] = 0;
+                removerLivro(&biblio, titulo);
+                break;
+            case 3:
+                printf("Título do livro a alterar: ");
+                fgets(titulo, sizeof(titulo), stdin);
+                titulo[strcspn(titulo, "\n")] = 0;
+                printf("Novo autor (deixe vazio para não alterar): ");
+                fgets(autor, sizeof(autor), stdin);
+                autor[strcspn(autor, "\n")] = 0;
+                printf("Novo título (deixe vazio para não alterar): ");
+                fgets(titulo, sizeof(titulo), stdin);
+                titulo[strcspn(titulo, "\n")] = 0;
+                printf("Nova editora (deixe vazio para não alterar): ");
+                fgets(editora, sizeof(editora), stdin);
+                editora[strcspn(editora, "\n")] = 0;
+                printf("Novo ano (0 para não alterar): ");
+                scanf("%d", &ano);
+                getchar();  
+                alterarLivro(&biblio, titulo, autor, titulo, editora, ano);
+                break;
+            case 4:
+                printf("Título do livro a buscar: ");
+                fgets(titulo, sizeof(titulo), stdin);
+                titulo[strcspn(titulo, "\n")] = 0;
+                buscarPorTitulo(&biblio, titulo);
+                break;
+            case 5:
+                printf("Autor do livro a buscar: ");
+                fgets(autor, sizeof(autor), stdin);
+                autor[strcspn(autor, "\n")] = 0;
+                buscarPorAutor(&biblio, autor);
+                break;
+            case 6:
+                imprimirTodos(&biblio);
+                break;
+            case 0:
+                break;
+            default:
+                printf("Opção inválida. Tente novamente.\n");
+        }
+    } while (opcao != 0);
+}
+
+int main() {
+    menu();
+    return 0;
+}
