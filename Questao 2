@@ -1,0 +1,115 @@
+/*
+** Função : Implementar uma pilha de números reais
+** Autor : [Seu Nome]
+** Data : [Data Atual]
+** Observações: Este programa permite inserir (push), retirar (pop) elementos da pilha e verificar se a pilha está vazia.
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Nodo {
+    float dado;
+    struct Nodo *proximo;
+} Nodo;
+
+typedef struct {
+    Nodo *topo;
+} Pilha;
+
+void inicializarPilha(Pilha *p) {
+    p->topo = NULL;
+}
+
+int estaVazia(Pilha *p) {
+    return p->topo == NULL;
+}
+
+void push(Pilha *p, float valor) {
+    Nodo *novoNodo = (Nodo *)malloc(sizeof(Nodo));
+    if (novoNodo == NULL) {
+        printf("Erro de memória.\n");
+        return;
+    }
+    novoNodo->dado = valor;
+    novoNodo->proximo = p->topo;
+    p->topo = novoNodo;
+    printf("Elemento %.2f colocado na pilha.\n", valor);
+}
+
+float pop(Pilha *p) {
+    if (estaVazia(p)) {
+        printf("A pilha está seca.\n");
+        return -1;  
+    }
+    Nodo *temp = p->topo;
+    float valor = temp->dado;
+    p->topo = p->topo->proximo;
+    free(temp);
+    printf("Elemento %.2f retirado da pilha.\n", valor);
+    return valor;
+}
+
+void imprimirPilha(Pilha *p) {
+    if (estaVazia(p)) {
+        printf("A pilha está seca.\n");
+        return;
+    }
+    Nodo *atual = p->topo;
+    printf("Pilha: ");
+    while (atual != NULL) {
+        printf("%.2f ", atual->dado);
+        atual = atual->proximo;
+    }
+    printf("\n");
+}
+
+void menu() {
+    Pilha pilha;
+    inicializarPilha(&pilha);
+    int opcao;
+    float valor;
+
+    do {
+        printf("\nMenu:\n");
+        printf("1. Inserir elemento (push)\n");
+        printf("2. Retirar elemento (pop)\n");
+        printf("3. Verificar se a pilha está seca\n");
+        printf("4. Imprimir pilha\n");
+        printf("0. Sair\n");
+        printf("Selecione uma opção: ");
+        scanf("%d", &opcao);
+
+        switch (opcao) {
+            case 1:
+                printf("Digite o valor: ");
+                scanf("%f", &valor);
+                push(&pilha, valor);
+                imprimirPilha(&pilha);
+                break;
+            case 2:
+                pop(&pilha);
+                imprimirPilha(&pilha);
+                break;
+            case 3:
+                if (estaVazia(&pilha)) {
+                    printf("A pilha está seca.\n");
+                } else {
+                    printf("A pilha não está seca.\n");
+                }
+                break;
+            case 4:
+                imprimirPilha(&pilha);
+                break;
+            case 0:
+                break;
+            default:
+                printf("Invalido. Tente novamente.\n");
+        }
+    } while (opcao != 0);
+}
+
+int main() {
+    menu();
+    return 0;
+}
